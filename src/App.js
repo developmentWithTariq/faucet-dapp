@@ -61,6 +61,18 @@ function App() {
     web3Api.web3 && getAccount()
   },[web3Api.web3])
 
+
+  const addFunds = async () => {  
+
+    const {contract , web3} = web3Api;
+    await contract.addFunds({
+      from: account,
+      value: web3.utils.toWei("1",'ether')
+    })
+  }
+  
+
+
   return (
     <>
       <div className="faucet-wrapper  is-justify-content-centre">
@@ -95,7 +107,9 @@ function App() {
           > */}
             {/* Enable Ethereum
           </button> */}
-          <button className="button mr-2  is-primary is-small ">Donate</button>
+          <button className="button mr-2  is-primary is-small " onClick={()=> {
+            addFunds()
+          }}>Donate</button>
           <button className="button is-link is-small">Withdraw</button>
         </div>
         </div>
