@@ -14,12 +14,13 @@ function App() {
 
   })
   const [ account, setAccount ] = useState(null)
+  const [ balance, setBalance ] = useState(null)
 
   useEffect(() => {
 
     const loadProvider = async () => {
       const provider = await detectEthereumProvider();
-      const contract = await loadContract("Faucet")
+      const contract = await loadContract("Faucet", provider)
       debugger
 
       if (provider ) {
@@ -38,6 +39,17 @@ function App() {
 
     loadProvider()
   }, [])
+
+  useEffect(() => {
+    const loadBalance = async () => {
+
+      const  {contract, web3} = web3Api;
+      const balance  = await web3.eth.getBalance(contract.address)
+      setBalance(web3.utils.fromWei(balance, "ether"))
+
+    }
+    web3Api.contract && loadBalance()
+  },[web3Api])
 
   useEffect(() => {
     const getAccount = async () =>{
@@ -72,7 +84,7 @@ function App() {
               }
             </div>
           <div className="balance-view is-size-2  my-4">
-            Current Balance: <strong>10</strong> ETH
+            Current Balance: <strong>{balance}</strong> ETH
           </div>
           {/* <button
             className="btn mr-2"
