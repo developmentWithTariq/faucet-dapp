@@ -15,15 +15,26 @@ function App() {
   })
   const [ account, setAccount ] = useState(null)
   const [ balance, setBalance ] = useState(null)
+  const [ reload, setReload ] = useState(false)
+
+  const reloadEffect = () =>{
+    setReload(!reload)
+  }
+
+  const setAccountListner = provider => {
+    provider.on('accountsChanged', accounts =>{ setAccount(accounts[0])})
+  }
 
   useEffect(() => {
 
     const loadProvider = async () => {
       const provider = await detectEthereumProvider();
       const contract = await loadContract("Faucet", provider)
-      debugger
+
+      
 
       if (provider ) {
+        setAccountListner(provider)
         // provider.request({method : "eth_requestAccounts"})
 
         setWeb3Api({
@@ -49,7 +60,7 @@ function App() {
 
     }
     web3Api.contract && loadBalance()
-  },[web3Api])
+  },[web3Api, reload])
 
   useEffect(() => {
     const getAccount = async () =>{
@@ -59,6 +70,7 @@ function App() {
       setAccount(accounts[0])
     }
     web3Api.web3 && getAccount()
+    
   },[web3Api.web3])
 
 
@@ -69,7 +81,20 @@ function App() {
       from: account,
       value: web3.utils.toWei("1",'ether')
     })
+    reloadEffect()
+    // window.location.reload()
   }
+  const withDraw = async () => {
+    const {contract, web3 } = web3Api
+    const WithdrawAmount  = web3.utils.toWei("0.1", 'ether')
+    await contract.withdraw(WithdrawAmount, {
+      from: account
+    })
+    reloadEffect()
+  }
+  
+
+  
   
 
 
@@ -89,6 +114,7 @@ function App() {
                 className="btn mr-2 button is-small"
                 onClick={ () => {
                   web3Api.provider.request( {method: "eth_requestAccounts"})
+                  
                   //  await window.ethereum.request({method: "eth_requestAccounts"})
                   // console.log(accounts)
                 }}
@@ -109,8 +135,11 @@ function App() {
           </button> */}
           <button className="button mr-2  is-primary is-small " onClick={()=> {
             addFunds()
+            
           }}>Donate</button>
-          <button className="button is-link is-small">Withdraw</button>
+          <button className="button is-link is-small" onClick={() => {
+            withDraw()
+          }} >Withdraw</button>
         </div>
         </div>
         </>
